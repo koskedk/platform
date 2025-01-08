@@ -28,16 +28,14 @@ services:
       KC_DB_PASSWORD: ${PG_PASSWORD}
       KEYCLOAK_ADMIN: ${KC_USERNAME}
       KEYCLOAK_ADMIN_PASSWORD: ${KC_PASSWORD}
-      KC_HOSTNAME: ${KC_HOSTNAME}
-      KC_PROXY: ${KC_PROXY}
+      KC_PROXY_HEADERS: xforwarded
       KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT}
-      KC_HOSTNAME_URL: ${KC_HOSTNAME_URL}
       KC_HTTPS_CERTIFICATE_FILE: ${KC_HTTPS_CERTIFICATE_FILE}
       KC_HTTPS_CERTIFICATE_KEY_FILE: ${KC_HTTPS_CERTIFICATE_KEY_FILE}
     restart: unless-stopped
     ports:
       - "${KC_PORT}:8443"
-    command: start --https-port 8443
+    command: start --hostname ${KC_HOSTNAME} --https-port 8443
     depends_on:
       - postgres
     networks:
