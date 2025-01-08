@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:${PG_VERSION}
+    container_name: ${PG_SERVICE}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USERNAME}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - "${PG_PORT}:5432"
+    networks:
+      - shule
+    volumes:
+      - ${PG_DATA}:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:${KC_VERSION}
+    container_name: ${KC_SERVICE}
+    environment:
+      KC_DB: ${KC_DB}
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: ${PG_DB}
+      KC_DB_USERNAME: ${PG_USERNAME}
+      KC_DB_PASSWORD: ${PG_PASSWORD}
+      KEYCLOAK_ADMIN: ${KC_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_PASSWORD}
+      KC_HOSTNAME: ${KC_HOSTNAME}
+      KC_PROXY: ${KC_PROXY}
+      KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT}
+      KC_HOSTNAME_URL: ${KC_HOSTNAME_URL}
+      KC_HTTPS_CERTIFICATE_FILE: ${KC_HTTPS_CERTIFICATE_FILE}
+      KC_HTTPS_CERTIFICATE_KEY_FILE: ${KC_HTTPS_CERTIFICATE_KEY_FILE}
+    restart: unless-stopped
+    ports:
+      - "${KC_PORT}:8443"
+    command: start --https-port 8443
+    depends_on:
+      - postgres
+    networks:
+      - shule
+    volumes:
+      - ${KC_SSL}:/opt/keycloak/certs
+
+networks:
+  shule:
+    driver: bridge
+
+volumes:
+  pg-data:
+  kc-ssl:
