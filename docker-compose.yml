@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:${PG_VERSION}
@@ -29,7 +27,6 @@ services:
       KEYCLOAK_ADMIN: ${KC_USERNAME}
       KEYCLOAK_ADMIN_PASSWORD: ${KC_PASSWORD}
       KC_PROXY_HEADERS: xforwarded
-      KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT}
       KC_HTTPS_CERTIFICATE_FILE: ${KC_HTTPS_CERTIFICATE_FILE}
       KC_HTTPS_CERTIFICATE_KEY_FILE: ${KC_HTTPS_CERTIFICATE_KEY_FILE}
     restart: unless-stopped
@@ -42,6 +39,31 @@ services:
       - shule
     volumes:
       - ${KC_SSL}:/opt/keycloak/certs
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Backend.Api/Dockerfile
+    ports:
+      - "${BE_PORT}:8080"
+    # environment:
+    #   - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - shule
+    depends_on:
+      - keycloak
+  
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FE_PORT}:3000"
+    # environment:
+    #   - REACT_APP_API_URL=${FE_API}
+    networks:
+      - shule
+    depends_on:
+      - backend
 
 networks:
   shule:
